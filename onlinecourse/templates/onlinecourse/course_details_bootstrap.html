@@ -1,0 +1,53 @@
+{% extends 'onlinecourse/base.html' %}
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <h1>{{ course.name }}</h1>
+        <p class="lead">{{ course.description }}</p>
+    </div>
+</div>
+
+<h2 class="mt-4">Lessons</h2>
+<div class="list-group mb-4">
+    {% for lesson in course.lesson_set.all %}
+    <div class="list-group-item">
+        <h5 class="mb-1">Lesson {{ lesson.order }}: {{ lesson.title }}</h5>
+        <p class="mb-1">{{ lesson.content }}</p>
+    </div>
+    {% empty %}
+    <p class="text-muted">No lessons available for this course.</p>
+    {% endfor %}
+</div>
+
+{% if course.question_set.all %}
+<h2 class="mt-4">Exam</h2>
+<form action="{% url 'onlinecourse:submit' course.id %}" method="post">
+    {% csrf_token %}
+    {% for question in course.question_set.all %}
+    <div class="card mt-3">
+        <div class="card-header">
+            <strong>{{ forloop.counter }}. {{ question.question_text }}</strong>
+            <span class="badge bg-primary float-end">{{ question.grade }} pts</span>
+        </div>
+        <div class="card-body">
+            {% for choice in question.choice_set.all %}
+            <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="choice_{{ choice.id }}"
+                       id="choice_{{ choice.id }}"
+                       value="{{ choice.id }}">
+                <label class="form-check-label" for="choice_{{ choice.id }}">
+                    {{ choice.choice_text }}
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    <input class="btn btn-success mt-3" type="submit" value="Submit Exam">
+</form>
+{% endif %}
+
+{% endblock %}
